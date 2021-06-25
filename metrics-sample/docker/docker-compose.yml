@@ -7,6 +7,29 @@ services:
     ports:
       - "8080:8080"
 
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: monitoring_cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    expose:
+      - 8080
+
+  portainer:
+    image: portainer/portainer
+    command: -H unix:///var/run/docker.sock
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
   prometheus:
     image: metrics-sample-prometheus
     build: prometheus
@@ -20,3 +43,6 @@ services:
       - "3000:3000"
     volumes:
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+
+volumes:
+  portainer_data:
